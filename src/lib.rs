@@ -117,11 +117,11 @@ pub struct Slab<T> {
     entries: Vec<Entry<T>>,
 
     // Number of Filled elements currently in the slab
-    len: usize,
+    len: u32,
 
     // Offset of the next available slot in the slab. Set to the slab's
     // capacity when the slab is full.
-    next: usize,
+    next: u32,
 }
 
 /// A handle to an vacant entry in a `Slab`.
@@ -149,24 +149,24 @@ pub struct Slab<T> {
 #[derive(Debug)]
 pub struct VacantEntry<'a, T: 'a> {
     slab: &'a mut Slab<T>,
-    key: usize,
+    key: u32,
 }
 
 /// An iterator over the values stored in the `Slab`
 pub struct Iter<'a, T: 'a> {
     entries: std::slice::Iter<'a, Entry<T>>,
-    curr: usize,
+    curr: u32,
 }
 
 /// A mutable iterator over the values stored in the `Slab`
 pub struct IterMut<'a, T: 'a> {
     entries: std::slice::IterMut<'a, Entry<T>>,
-    curr: usize,
+    curr: u32,
 }
 
 #[derive(Clone)]
 enum Entry<T> {
-    Vacant(usize),
+    Vacant(u32),
     Occupied(T),
 }
 
@@ -213,9 +213,9 @@ impl<T> Slab<T> {
     /// // ...but this may make the slab reallocate
     /// slab.insert(11);
     /// ```
-    pub fn with_capacity(capacity: usize) -> Slab<T> {
+    pub fn with_capacity(capacity: u32) -> Slab<T> {
         Slab {
-            entries: Vec::with_capacity(capacity),
+            entries: Vec::with_capacity(capacity as usize),
             next: 0,
             len: 0,
         }
@@ -230,8 +230,8 @@ impl<T> Slab<T> {
     /// let slab: Slab<i32> = Slab::with_capacity(10);
     /// assert_eq!(slab.capacity(), 10);
     /// ```
-    pub fn capacity(&self) -> usize {
-        self.entries.capacity()
+    pub fn capacity(&self) -> u32 {
+        self.entries.capacity() as u32
     }
 
     /// Reserves capacity for at least `additional` more values to be stored
@@ -249,7 +249,7 @@ impl<T> Slab<T> {
     ///
     /// # Panics
     ///
-    /// Panics if the new capacity overflows `usize`.
+    /// Panics if the new capacity overflows `u32`.
     ///
     /// # Examples
     ///
@@ -260,12 +260,12 @@ impl<T> Slab<T> {
     /// slab.reserve(10);
     /// assert!(slab.capacity() >= 11);
     /// ```
-    pub fn reserve(&mut self, additional: usize) {
+    pub fn reserve(&mut self, additional: u32) {
         if self.capacity() - self.len >= additional {
             return;
         }
-        let need_add = self.len + additional - self.entries.len();
-        self.entries.reserve(need_add);
+        let need_add = self.len + additional - self.entries.len() as u32;
+        self.entries.reserve(need_add as usize);
     }
 
     /// Reserves the minimum capacity required to store exactly `additional`
@@ -283,7 +283,7 @@ impl<T> Slab<T> {
     ///
     /// # Panics
     ///
-    /// Panics if the new capacity overflows `usize`.
+    /// Panics if the new capacity overflows `u32`.
     ///
     /// # Examples
     ///
@@ -294,12 +294,12 @@ impl<T> Slab<T> {
     /// slab.reserve_exact(10);
     /// assert!(slab.capacity() >= 11);
     /// ```
-    pub fn reserve_exact(&mut self, additional: usize) {
+    pub fn reserve_exact(&mut self, additional: u32) {
         if self.capacity() - self.len >= additional {
             return;
         }
-        let need_add = self.len + additional - self.entries.len();
-        self.entries.reserve_exact(need_add);
+        let need_add = self.len + additional - self.entries.len() as u32;
+        self.entries.reserve_exact(need_add as usize);
     }
 
     /// Shrinks the capacity of the slab as much as possible.
@@ -381,7 +381,7 @@ impl<T> Slab<T> {
     ///
     /// assert_eq!(3, slab.len());
     /// ```
-    pub fn len(&self) -> usize {
+    pub fn len(&self) -> u32 {
         self.len
     }
 
@@ -479,8 +479,8 @@ impl<T> Slab<T> {
     /// assert_eq!(slab.get(key), Some(&"hello"));
     /// assert_eq!(slab.get(123), None);
     /// ```
-    pub fn get(&self, key: usize) -> Option<&T> {
-        match self.entries.get(key) {
+    pub fn get(&self, key: u32) -> Option<&T> {
+        match self.entries.get(key as usize) {
             Some(&Entry::Occupied(ref val)) => Some(val),
             _ => None,
         }
@@ -503,8 +503,8 @@ impl<T> Slab<T> {
     /// assert_eq!(slab[key], "world");
     /// assert_eq!(slab.get_mut(123), None);
     /// ```
-    pub fn get_mut(&mut self, key: usize) -> Option<&mut T> {
-        match self.entries.get_mut(key) {
+    pub fn get_mut(&mut self, key: u32) -> Option<&mut T> {
+        match self.entries.get_mut(key as usize) {
             Some(&mut Entry::Occupied(ref mut val)) => Some(val),
             _ => None,
         }
@@ -526,8 +526,8 @@ impl<T> Slab<T> {
     ///     assert_eq!(slab.get_unchecked(key), &2);
     /// }
     /// ```
-    pub unsafe fn get_unchecked(&self, key: usize) -> &T {
-        match *self.entries.get_unchecked(key) {
+    pub unsafe fn get_unchecked(&self, key: u32) -> &T {
+        match *self.entries.get_unchecked(key as usize) {
             Entry::Occupied(ref val) => val,
             _ => unreachable!(),
         }
@@ -552,8 +552,8 @@ impl<T> Slab<T> {
     ///
     /// assert_eq!(slab[key], 13);
     /// ```
-    pub unsafe fn get_unchecked_mut(&mut self, key: usize) -> &mut T {
-        match *self.entries.get_unchecked_mut(key) {
+    pub unsafe fn get_unchecked_mut(&mut self, key: u32) -> &mut T {
+        match *self.entries.get_unchecked_mut(key as usize) {
             Entry::Occupied(ref mut val) => val,
             _ => unreachable!(),
         }
@@ -567,7 +567,7 @@ impl<T> Slab<T> {
     ///
     /// # Panics
     ///
-    /// Panics if the number of elements in the vector overflows a `usize`.
+    /// Panics if the number of elements in the vector overflows a `u32`.
     ///
     /// # Examples
     ///
@@ -577,7 +577,7 @@ impl<T> Slab<T> {
     /// let key = slab.insert("hello");
     /// assert_eq!(slab[key], "hello");
     /// ```
-    pub fn insert(&mut self, val: T) -> usize {
+    pub fn insert(&mut self, val: T) -> u32 {
         let key = self.next;
 
         self.insert_at(key, val);
@@ -615,15 +615,15 @@ impl<T> Slab<T> {
         }
     }
 
-    fn insert_at(&mut self, key: usize, val: T) {
+    fn insert_at(&mut self, key: u32, val: T) {
         self.len += 1;
 
-        if key == self.entries.len() {
+        if key == self.entries.len() as u32 {
             self.entries.push(Entry::Occupied(val));
             self.next = key + 1;
         } else {
             let prev = mem::replace(
-                &mut self.entries[key],
+                &mut self.entries[key as usize],
                 Entry::Occupied(val));
 
             match prev {
@@ -655,10 +655,10 @@ impl<T> Slab<T> {
     /// assert_eq!(slab.remove(hello), "hello");
     /// assert!(!slab.contains(hello));
     /// ```
-    pub fn remove(&mut self, key: usize) -> T {
+    pub fn remove(&mut self, key: u32) -> T {
         // Swap the entry at the provided value
         let prev = mem::replace(
-            &mut self.entries[key],
+            &mut self.entries[key as usize],
             Entry::Vacant(self.next));
 
         match prev {
@@ -669,7 +669,7 @@ impl<T> Slab<T> {
             }
             _ => {
                 // Woops, the entry is actually vacant, restore the state
-                self.entries[key] = prev;
+                self.entries[key as usize] = prev;
                 panic!("invalid key");
             }
         }
@@ -690,8 +690,8 @@ impl<T> Slab<T> {
     ///
     /// assert!(!slab.contains(hello));
     /// ```
-    pub fn contains(&self, key: usize) -> bool {
-        self.entries.get(key)
+    pub fn contains(&self, key: u32) -> bool {
+        self.entries.get(key as usize)
             .map(|e| {
                 match *e {
                     Entry::Occupied(_) => true,
@@ -703,7 +703,7 @@ impl<T> Slab<T> {
 
     /// Retain only the elements specified by the predicate.
     ///
-    /// In other words, remove all elements `e` such that `f(usize, &mut e)`
+    /// In other words, remove all elements `e` such that `f(u32, &mut e)`
     /// returns false. This method operates in place and preserves the key
     /// associated with the retained values.
     ///
@@ -726,35 +726,35 @@ impl<T> Slab<T> {
     /// assert_eq!(2, slab.len());
     /// ```
     pub fn retain<F>(&mut self, mut f: F)
-        where F: FnMut(usize, &mut T) -> bool
+        where F: FnMut(u32, &mut T) -> bool
     {
         for i in 0..self.entries.len() {
             let keep = match self.entries[i] {
-                Entry::Occupied(ref mut v) => f(i, v),
+                Entry::Occupied(ref mut v) => f(i as u32, v),
                 _ => true,
             };
 
             if !keep {
-                self.remove(i);
+                self.remove(i as u32);
             }
         }
     }
 }
 
-impl<T> ops::Index<usize> for Slab<T> {
+impl<T> ops::Index<u32> for Slab<T> {
     type Output = T;
 
-    fn index(&self, key: usize) -> &T {
-        match self.entries[key] {
+    fn index(&self, key: u32) -> &T {
+        match self.entries[key as usize] {
             Entry::Occupied(ref v) => v,
             _ => panic!("invalid key"),
         }
     }
 }
 
-impl<T> ops::IndexMut<usize> for Slab<T> {
-    fn index_mut(&mut self, key: usize) -> &mut T {
-        match self.entries[key] {
+impl<T> ops::IndexMut<u32> for Slab<T> {
+    fn index_mut(&mut self, key: u32) -> &mut T {
+        match self.entries[key as usize] {
             Entry::Occupied(ref mut v) => v,
             _ => panic!("invalid key"),
         }
@@ -762,7 +762,7 @@ impl<T> ops::IndexMut<usize> for Slab<T> {
 }
 
 impl<'a, T> IntoIterator for &'a Slab<T> {
-    type Item = (usize, &'a T);
+    type Item = (u32, &'a T);
     type IntoIter = Iter<'a, T>;
 
     fn into_iter(self) -> Iter<'a, T> {
@@ -771,7 +771,7 @@ impl<'a, T> IntoIterator for &'a Slab<T> {
 }
 
 impl<'a, T> IntoIterator for &'a mut Slab<T> {
-    type Item = (usize, &'a mut T);
+    type Item = (u32, &'a mut T);
     type IntoIter = IterMut<'a, T>;
 
     fn into_iter(self) -> IterMut<'a, T> {
@@ -834,7 +834,7 @@ impl<'a, T> VacantEntry<'a, T> {
     pub fn insert(self, val: T) -> &'a mut T {
         self.slab.insert_at(self.key, val);
 
-        match self.slab.entries[self.key] {
+        match self.slab.entries[self.key as usize] {
             Entry::Occupied(ref mut v) => v,
             _ => unreachable!(),
         }
@@ -861,7 +861,7 @@ impl<'a, T> VacantEntry<'a, T> {
     /// assert_eq!(hello, slab[hello].0);
     /// assert_eq!("hello", slab[hello].1);
     /// ```
-    pub fn key(&self) -> usize {
+    pub fn key(&self) -> u32 {
         self.key
     }
 }
@@ -869,9 +869,9 @@ impl<'a, T> VacantEntry<'a, T> {
 // ===== Iter =====
 
 impl<'a, T> Iterator for Iter<'a, T> {
-    type Item = (usize, &'a T);
+    type Item = (u32, &'a T);
 
-    fn next(&mut self) -> Option<(usize, &'a T)> {
+    fn next(&mut self) -> Option<(u32, &'a T)> {
         while let Some(entry) = self.entries.next() {
             let curr = self.curr;
             self.curr += 1;
@@ -888,9 +888,9 @@ impl<'a, T> Iterator for Iter<'a, T> {
 // ===== IterMut =====
 
 impl<'a, T> Iterator for IterMut<'a, T> {
-    type Item = (usize, &'a mut T);
+    type Item = (u32, &'a mut T);
 
-    fn next(&mut self) -> Option<(usize, &'a mut T)> {
+    fn next(&mut self) -> Option<(u32, &'a mut T)> {
         while let Some(entry) = self.entries.next() {
             let curr = self.curr;
             self.curr += 1;

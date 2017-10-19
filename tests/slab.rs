@@ -76,7 +76,7 @@ fn insert_with_vacant_entry() {
 
 #[test]
 fn get_vacant_entry_without_using() {
-    let mut slab = Slab::<usize>::with_capacity(1);
+    let mut slab = Slab::<u32>::with_capacity(1);
     let key = slab.vacant_entry().key();
     assert_eq!(key, slab.vacant_entry().key());
 }
@@ -84,14 +84,14 @@ fn get_vacant_entry_without_using() {
 #[test]
 #[should_panic]
 fn invalid_get_panics() {
-    let slab = Slab::<usize>::with_capacity(1);
+    let slab = Slab::<u32>::with_capacity(1);
     slab[0];
 }
 
 #[test]
 #[should_panic]
 fn double_remove_panics() {
-    let mut slab = Slab::<usize>::with_capacity(1);
+    let mut slab = Slab::<u32>::with_capacity(1);
     let key = slab.insert(123);
     slab.remove(key);
     slab.remove(key);
@@ -100,7 +100,7 @@ fn double_remove_panics() {
 #[test]
 #[should_panic]
 fn invalid_remove_panics() {
-    let mut slab = Slab::<usize>::with_capacity(1);
+    let mut slab = Slab::<u32>::with_capacity(1);
     slab.remove(0);
 }
 
@@ -193,7 +193,7 @@ fn iter() {
     }
 
     let vals: Vec<_> = slab.iter().enumerate().map(|(i, (key, val))| {
-        assert_eq!(i, key);
+        assert_eq!(i as u32, key);
         *val
     }).collect();
     assert_eq!(vals, vec![0, 1, 2, 3]);
@@ -213,7 +213,7 @@ fn iter_mut() {
     }
 
     for (i, (key, e)) in slab.iter_mut().enumerate() {
-        assert_eq!(i, key);
+        assert_eq!(i as u32, key);
         *e = *e + 1;
     }
 
