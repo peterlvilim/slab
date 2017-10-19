@@ -100,7 +100,7 @@
 
 #![deny(warnings, missing_docs, missing_debug_implementations)]
 #![doc(html_root_url = "https://docs.rs/slab/0.4")]
-#![crate_name = "slab-32"]
+#![crate_name = "slab_32"]
 
 use std::{fmt, mem};
 use std::iter::IntoIterator;

@@ -1,6 +1,6 @@
 [package]
 
-name = "slab-32"
+name = "slab_32"
 version = "0.1.0"
 license = "MIT"
 authors = ["Carl Lerche <me@carllerche.com>", "Peter Vilim <peterlvilim@gmail.com>"]
