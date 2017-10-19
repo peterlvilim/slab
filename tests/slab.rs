@@ -1,6 +1,6 @@
-extern crate slab;
+extern crate slab_32;
 
-use slab::*;
+use slab_32::*;
 
 #[test]
 fn insert_get_remove_one() {
