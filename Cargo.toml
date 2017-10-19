@@ -3,7 +3,7 @@
 name = "slab-32"
 version = "0.1.0"
 license = "MIT"
-authors = ["Carl Lerche <me@carllerche.com>", "Peter Vilim <peterlvilim@gmail.com>]
+authors = ["Carl Lerche <me@carllerche.com>", "Peter Vilim <peterlvilim@gmail.com>"]
 description = "Forked from the main slab crate as an experiment. Don't use."
 documentation = "https://docs.rs/slab"
 homepage = "https://github.com/peterlvilim/slab"
